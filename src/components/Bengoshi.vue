@@ -2,9 +2,12 @@
   <div class="aboutme">
     <h1>弁護士ドットコム - ニュース一覧</h1>
 
+
     <div class="row">
+        <input v-model="searchText" v-on:change="searchNews" type="text" id="search" placeholder="Search..."/>
+
       <div class="col-md-12 my-card" v-for="(article) in articles" v-bind:key="article.id">
-        <strong>{{ truncateTitle(article.title) }}</strong>
+        <strong v-html="article.title" class="title">{{ truncateTitle(article.title) }}</strong>
         <p>ID: {{ article.id }} Category: {{ article.category }}</p>
         <p>published at: {{ article.pubDate }}</p>
         <p>
@@ -23,7 +26,8 @@ export default {
   name: 'bengoshi',
   data () {
     return {
-      articles: []
+      articles: [],
+      searchText: '',
     }
   },
 
@@ -34,6 +38,22 @@ export default {
     commentPage: function (id, e) {
       if (e) e.preventDefault()
       console.log(id)
+    },
+    searchNews: function () {
+
+      fetch(`http://localhost:3000/data`)
+      .then((res) => res.json())
+      .then((data) => {
+        this.articles = data.filter((d) => String(d.title).indexOf(this.searchText) != -1)
+        for(var i = 0; i < this.articles.length; i++){
+          var d = this.articles[i]
+          var new_title = d['title'].replace(this.searchText, "<span style='background: yellow;'>" + this.searchText + "</span>")
+          this.articles[i]['title'] = new_title
+        }
+
+      })
+      .then((err) => console.log(err))
+
     }
   },
   created () {
@@ -48,6 +68,9 @@ export default {
 </script>
 
 <style scoped>
+  .light{
+    backbround: yellow;
+  }
   h1{
     color: #5b7e91;
     margin-top: 120px;
@@ -69,4 +92,5 @@ export default {
   a, a:visited, a:hover{
     color: white;
   }
+
 </style>
